@@ -22,6 +22,24 @@ This review uses the support export dated **4 October 2026**. It is a snapshot, 
 The desk may have received reports or changed tickets since then. Reconcile against current
 ticket IDs and merge history before acting on the queue.
 
+## Desk update: 5 October 2026
+
+After the first submission, the [course challenge page](https://hq.mega.dev/challenges/what-it-shows)
+published an engineering update: **#4471 closed 5 October**. The parser was **fixed**
+(`fix(dates): parse dd/mm for eu locales`). The hint was **won't fix** because the
+**booking-v3 form was retired**. These are different dispositions; retirement does not mean
+the hint was repaired.
+
+- [Parser ticket #1](https://github.com/ociesinska/mega-s01e03-what-it-shows/issues/1): completed,
+  based on the desk's reported fix. We have not independently tested the production patch.
+- [Form-hint ticket #2](https://github.com/ociesinska/mega-s01e03-what-it-shows/issues/2): not planned,
+  because the affected form was retired.
+- [Timing investigation #3](https://github.com/ociesinska/mega-s01e03-what-it-shows/issues/3): open.
+  The engineering update does not establish any resolution for these five reports.
+
+The report counts below remain the 4 October export's allocation; a closed ticket does not
+change historical counts or prove that every merged symptom was fixed.
+
 The [original incident page](/kb/incidents/4471) calls this one parser bug. Its own rendered
 table separates two causes. Reading the report bodies reveals timing anomalies that the
 table's classifier cannot detect. The split below is proposed; no engineering fix or support
