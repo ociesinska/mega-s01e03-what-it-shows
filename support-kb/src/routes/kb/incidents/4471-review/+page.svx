@@ -1,0 +1,112 @@
+---
+layout: runbook
+title: '#4471 reviewed: separate date defects from timing anomalies'
+owner: ociesinska
+status: proposed
+reviewed: '2026-11-01'
+signature: 'ociesinska / Codex / S01E03'
+---
+
+<script>
+  import ReviewedReports from '#lib/kb/ReviewedReports.svelte';
+  import CauseTable from '#lib/kb/CauseTable.svelte';
+  import QueueTimeline from '#lib/kb/QueueTimeline.svelte';
+  import DedupeExplorer from '#lib/kb/DedupeExplorer.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+</script>
+
+## Scope and confidence
+
+This review uses the support export dated **4 October 2026**. It is a snapshot, not the live desk.
+The desk may have received reports or changed tickets since then. Reconcile against current
+ticket IDs and merge history before acting on the queue.
+
+The [original incident page](/kb/incidents/4471) calls this one parser bug. Its own rendered
+table separates two causes. Reading the report bodies reveals timing anomalies that the
+table's classifier cannot detect. The split below is proposed; no engineering fix or support
+decision is claimed to have been approved.
+
+## Reviewed report allocation
+
+<ReviewedReports />
+
+## What needs fixing or investigating
+
+### Parser: respect the input's date order
+
+The shared parser reads dates month first. A day-first tenant's app or email input can
+therefore swap day and month. For example, R-41200 reports 7 April becoming 4 July, and
+R-41203 reports 2 December becoming 12 February.
+
+Confirm the input contract for each channel and parse according to that contract; reject
+invalid or ambiguous input rather than silently swapping it. Verify both ambiguous dates
+and days greater than twelve. Tenant locale comes from the directory, not the reporter's browser.
+
+### Form hint: match the tenant's date order
+
+For day-first tenants using booking-v3, the form prints `MM/DD/YYYY`, while the form reads
+dates in the tenant's order. A person following the hint gets a swapped date. R-41230 is
+one example: copper.studio, booking-v3, form channel, 6 January versus 1 June. Intake tagged
+that report `parser`, demonstrating why intake tags do not determine the split.
+
+Align the hint with the form's parsing contract and test the actual displayed field and
+submitted value together. Fixing the shared parser alone does not correct misleading instructions.
+
+### Timing: investigate without assuming a root cause
+
+The evidence table preserves all five reports. One-day shifts and different days in Lisbon
+and Toronto could involve time zones or date-only conversions. An invite arriving before its
+booking could instead involve scheduling or delivery order. These are hypotheses, not findings.
+
+Obtain event and booking IDs, creation and send timestamps with offsets, tenant and recipient
+time zones, original invite payloads, calendar display settings, and delivery logs. Reproduce
+each symptom, including June-only behavior. Split this provisional investigation further if
+the evidence establishes different mechanisms. Do not claim a timezone fix has been proven.
+
+## What the existing components actually compute
+
+<CauseTable ticket={4471} />
+
+The classifier uses tenant locale, channel, and form version. It never reads the report body.
+Consequently it assigns the timing anomalies to `parser`. Its totals differ from the reviewed
+allocation above for that explicit reason. Browser locale and `meta.intakeTag` are intake guesses.
+Deduplicate export rows by report ID, not by identical body or subject.
+
+## When reports arrived versus when they were merged
+
+<QueueTimeline ticket={4471} />
+
+The chart shows received and merged dates separately. A bulk merge on 2 July is not a sudden
+onset: some reports had arrived months earlier. Continued merges through the export's last day
+also mean that a queued fix is not evidence of resolution. Use receivedAt for symptom history
+and mergedAt for desk activity.
+
+## Proposed triage rule
+
+The [accepted decision 0001](/kb/decisions/0001-dedupe-by-subject) and
+[triage prose](/kb/triage/dedupe) date from 2024. They match subjects without reading bodies.
+Preserve that accepted record as history; this page proposes a replacement for desk approval:
+
+1. Read the body and establish the observed versus expected behavior, tenant, locale, channel,
+   and form version. Ask for missing context.
+2. Use a matching subject only to find candidates. Merge after verifying the same failure
+   mechanism; different subjects can still describe the same mechanism.
+3. Keep distinct mechanisms separate, even with identical subjects. With unknown tenant or
+   contradictory evidence, keep the report unclassified and investigate rather than force a merge.
+4. Count unique report IDs once. Preserve provenance and link related investigations.
+5. Re-read the rendered views and reconcile the live queue before publishing current totals.
+
+<DedupeExplorer />
+
+The explorer demonstrates why subject matching fails: the same tenant and subject can produce
+different causes through different channels, while different subjects can share a cause.
+It too is limited to the classifier's inputs and cannot settle the timing investigation.
+
+<Callout kind="warn">
+  Treat narrative, tags, and computed views as evidence with limits. Check the underlying
+  reports before treating a classification as a diagnosis. These snapshot counts do not
+  establish the current state of the desk.
+</Callout>
+
+<RenderStamp {signature} />
