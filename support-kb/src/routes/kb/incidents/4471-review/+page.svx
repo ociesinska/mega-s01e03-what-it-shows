@@ -4,7 +4,7 @@ title: '#4471 reviewed: separate date defects from timing anomalies'
 owner: ociesinska
 status: proposed
 reviewed: '2026-11-01'
-signature: 'ociesinska / Codex / S01E03'
+signature: 'v1.eyJzdWIiOiIxNDA1IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTM1NTUzNTgsImV4cCI6MTc5MzY0MTc1OH0.DMcQ8SJDDBFsdZWDkSuibRZuNWxTP3yqw0L8TIteRwg'
 ---
 
 <script>
